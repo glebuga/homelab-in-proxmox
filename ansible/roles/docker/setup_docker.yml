@@ -1,0 +1,13 @@
+---
+- name: Install Docker
+  hosts: docker_nodes
+  become: yes
+  tasks:
+    - name: Update apt
+      apt:
+        update_cache: yes
+
+    - name: Install Docker Engine
+      apt:
+        name: docker.io
+        state: present

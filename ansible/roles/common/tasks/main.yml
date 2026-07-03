@@ -1,0 +1,59 @@
+---
+- name: Установить базовые пакеты
+  ansible.builtin.apt:
+    update_cache: true
+    state: present
+    name:
+      - curl
+      - vim
+      - htop
+
+- name: Создать симлинк /etc/resolv.conf
+  ansible.builtin.file:
+    src: /run/systemd/resolve/stub-resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+    force: true
+
+# # 1. Настройка
+# # - name: Удалить сгенерированный Proxmox resolv.conf
+# #   ansible.builtin.file:
+# #     path: /etc/resolv.conf
+# #     state: absent
+
+# - name: Установить базовые пакеты
+#   ansible.builtin.apt:
+#     update_cache: yes
+#     state: present
+#     name:
+#       - curl
+#       - vim
+#       - htop
+
+# - name: Создать симлинк /etc/resolv.conf
+#   ansible.builtin.file:
+#     src: /run/systemd/resolve/stub-resolv.conf
+#     dest: /etc/resolv.conf
+#     state: link
+#     force: yes
+
+# - name: Настроить внутренний DNS
+#   ansible.builtin.lineinfile:
+#     path: /etc/systemd/resolved.conf
+#     regexp: '^#?DNS='
+#     line: "DNS={{ hostvars[groups['net_service'][0]]['ansible_host'] }}"
+#   notify: restart systemd-resolved
+#   when: inventory_hostname not in groups['net_service']
+
+# - name: Настроить внешний DNS для DNS-сервера
+#   ansible.builtin.lineinfile:
+#     path: /etc/systemd/resolved.conf
+#     regexp: '^#?DNS='
+#     line: "DNS=8.8.8.8 1.1.1.1"
+#   notify: restart systemd-resolved
+#   when: inventory_hostname in groups['net_service']
+
+# - name: Применить изменения DNS
+#   ansible.builtin.meta: flush_handlers
+#   when: inventory_hostname != "hq"
+  

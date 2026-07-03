@@ -1,0 +1,39 @@
+---
+- name: Установить iptables-persistent
+  ansible.builtin.apt:
+    name: iptables-persistent
+    state: present
+    update_cache: yes
+
+- name: Развернуть правила Docker
+  ansible.builtin.template:
+    src: docker.rules.j2
+    dest: /etc/iptables/rules.v4
+    owner: root
+    group: root
+    mode: "0644"
+  when: inventory_hostname in groups["docker_nodes"]
+  notify: Restore iptables
+
+- name: Развернуть правила Nginx
+  ansible.builtin.template:
+    src: nginx.rules.j2
+    dest: /etc/iptables/rules.v4
+    owner: root
+    group: root
+    mode: "0644"
+  when: inventory_hostname in groups["nginx_nodes"]
+  notify: Restore iptables
+
+- name: Развернуть правила DNS
+  ansible.builtin.template:
+    src: net-services.rules.j2
+    dest: /etc/iptables/rules.v4
+    owner: root
+    group: root
+    mode: "0644"
+  when: inventory_hostname in groups["net_service"]
+  notify: Restore iptables
+
+- name: Применить изменения
+  ansible.builtin.meta: flush_handlers

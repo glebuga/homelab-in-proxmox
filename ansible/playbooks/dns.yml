@@ -1,0 +1,6 @@
+---
+- name: Настройка DNS
+  hosts: net_service
+  become: true
+  roles:
+    - dns

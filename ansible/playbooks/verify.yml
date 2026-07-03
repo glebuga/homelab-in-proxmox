@@ -1,0 +1,44 @@
+---
+- name: Healthcheck
+  hosts: all:!hq
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Получить настроенные DNS-серверы
+      ansible.builtin.command: resolvectl dns
+      register: dns_servers
+      changed_when: false
+
+    - name: Показать DNS
+      ansible.builtin.debug:
+        msg: "{{ dns_servers.stdout_lines }}"
+
+    - name: Проверить разрешение через системный DNS
+      ansible.builtin.command: getent hosts google.com
+      register: dns_lookup
+      changed_when: false
+
+    - name: Показать результат разрешения
+      ansible.builtin.debug:
+        var: dns_lookup.stdout
+
+    - name: Проверить доступность внутреннего DNS
+      ansible.builtin.command: dig @{{ hostvars[groups['net_service'][0]].ansible_host }} google.com +short
+      register: dig_internal
+      changed_when: false
+
+    - name: Показать ответ внутреннего DNS
+      ansible.builtin.debug:
+        var: dig_internal.stdout
+
+    - name: Проверить dnsmasq
+      ansible.builtin.command: systemctl is-active dnsmasq
+      when: inventory_hostname in groups["net_service"]
+      register: dnsmasq_status
+      changed_when: false
+
+    - name: Показать статус dnsmasq
+      ansible.builtin.debug:
+        var: dnsmasq_status.stdout
+      when: inventory_hostname in groups["net_service"]

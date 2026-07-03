@@ -1,0 +1,6 @@
+---
+- name: Базовая настройка серверов
+  hosts: all:!hq
+  become: true
+  roles:
+    - common

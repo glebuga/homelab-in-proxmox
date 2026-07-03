@@ -1,0 +1,9 @@
+---
+- name: Restore iptables
+  ansible.builtin.command:
+    cmd: iptables-restore /etc/iptables/rules.v4
+  notify: Save iptables
+
+- name: Save iptables
+  ansible.builtin.command:
+    cmd: netfilter-persistent save

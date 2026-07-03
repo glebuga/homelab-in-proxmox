@@ -1,0 +1,46 @@
+---
+- name: Установить dnsmasq
+  ansible.builtin.apt:
+    name: dnsmasq
+    state: present
+
+- name: Генерация файла хостов
+  ansible.builtin.template:
+    src: homelab.hosts.j2
+    dest: /etc/homelab.hosts
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart dnsmasq
+
+- name: Настройка dnsmasq
+  ansible.builtin.template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.d/homelab.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart dnsmasq
+
+- name: Включить dnsmasq
+  ansible.builtin.systemd:
+    name: dnsmasq
+    state: started
+    enabled: true
+
+- name: Настроить внешний DNS
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^#?DNS='
+    line: "DNS=8.8.8.8 1.1.1.1"
+  notify: restart systemd-resolved
+
+- name: Настроить поисковый домен
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^#?Domains='
+    line: "Domains=lab.local"
+  notify: restart systemd-resolved
+
+- name: Применить изменения
+  ansible.builtin.meta: flush_handlers
