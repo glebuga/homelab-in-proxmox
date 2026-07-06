@@ -1,5 +1,5 @@
 ---
-- name: Настройка firewall
+- name: Configure firewall
   hosts: all:!hq
   become: true
   roles:

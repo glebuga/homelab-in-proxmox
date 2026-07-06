@@ -1,4 +1,4 @@
-- name: Настройка docker
+- name: Configure docker
   hosts: docker_nodes
   become: true
   roles:

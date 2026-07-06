@@ -1,5 +1,5 @@
 ---
-- name: Первичная настройка 
+- name: Initial setup
   hosts: all:!hq
   remote_user: "{{ bootstrap_user | default(ansible_user) }}"
   become: true
@@ -14,26 +14,26 @@
 
   tasks:
 
-    - name: Обновить индекс пакетов (Debian)
+    - name: Update package index (Debian)
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
       when: ansible_os_family == "Debian"
 
-    - name: Обновить кэш пакетов (RedHat)
+    - name: Update package cache (RedHat)
       ansible.builtin.dnf:
         update_cache: true
       when: ansible_os_family == "RedHat"
 
-    - name: Установить hostname
+    - name: Set hostname
       ansible.builtin.hostname:
         name: "{{ inventory_hostname }}"
 
-    - name: Настроить часовой пояс
+    - name: Configure timezone
       ansible.builtin.timezone:
         name: "{{ timezone }}"
 
-    - name: Создать пользователя администратора
+    - name: Create admin user
       ansible.builtin.user:
         name: "{{ admin_user }}"
         shell: /bin/bash
@@ -43,14 +43,14 @@
         append: true
         state: present
 
-    - name: Создать каталог ~/.ssh
+    - name: Create ~/.ssh directory
       ansible.builtin.file:
         path: "/home/{{ admin_user }}/.ssh"
         state: directory
         owner: "{{ admin_user }}"
         mode: "0700"
 
-    - name: Добавить публичные SSH-ключи
+    - name: Add public SSH keys
       ansible.builtin.authorized_key:
         user: "{{ admin_user }}"
         key: "{{ item }}"
@@ -58,7 +58,7 @@
         exclusive: false
       loop: "{{ ssh_public_keys }}"
 
-    - name: Разрешить sudo без пароля
+    - name: Allow passwordless sudo
       ansible.builtin.copy:
         dest: "/etc/sudoers.d/{{ admin_user }}"
         content: "{{ admin_user }} ALL=(ALL:ALL) NOPASSWD:ALL\n"
@@ -67,7 +67,7 @@
         mode: "0440"
         validate: "/usr/sbin/visudo -cf %s"
 
-    - name: Отключить аутентификацию по паролю
+    - name: Disable password authentication
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
         regexp: "^#?PasswordAuthentication"
@@ -75,7 +75,7 @@
         validate: "sshd -t -f %s"
       notify: restart ssh
 
-    - name: Запретить вход под пользователем root
+    - name: Disable root login
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
         regexp: "^#?PermitRootLogin"
@@ -83,12 +83,12 @@
         validate: "sshd -t -f %s"
       notify: restart ssh
 
-    - name: Заблокировать пароль пользователя root
+    - name: Lock root password
       ansible.builtin.user:
         name: root
         password_lock: true
 
-    - name: Удалить authorized_keys пользователя root
+    - name: Remove root authorized_keys
       ansible.builtin.file:
         path: /root/.ssh/authorized_keys
         state: absent

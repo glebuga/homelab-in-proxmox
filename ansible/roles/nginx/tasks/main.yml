@@ -1,23 +1,23 @@
 ---
-- name: Установить nginx
+- name: Install nginx
   ansible.builtin.apt:
     name: nginx
     state: present
     update_cache: true
 
-- name: Включить и запустить nginx
+- name: Enable and start nginx
   ansible.builtin.systemd:
     name: nginx
     state: started
     enabled: true
 
-- name: Удалить дефолтный сайт
+- name: Remove default site
   ansible.builtin.file:
     path: /etc/nginx/sites-enabled/default
     state: absent
   notify: restart nginx
 
-- name: Развернуть конфигурацию reverse proxy
+- name: Deploy reverse proxy configuration
   ansible.builtin.template:
     src: homelab.conf.j2
     dest: /etc/nginx/sites-available/homelab.conf
@@ -26,16 +26,16 @@
     mode: "0644"
   notify: restart nginx
 
-- name: Включить сайт
+- name: Enable site
   ansible.builtin.file:
     src: /etc/nginx/sites-available/homelab.conf
     dest: /etc/nginx/sites-enabled/homelab.conf
     state: link
   notify: restart nginx
 
-- name: Проверить конфигурацию nginx
+- name: Check nginx configuration
   ansible.builtin.command: nginx -t
   changed_when: false
 
-- name: Применить изменения
+- name: Apply changes
   ansible.builtin.meta: flush_handlers

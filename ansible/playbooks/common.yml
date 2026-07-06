@@ -1,5 +1,5 @@
 ---
-- name: Базовая настройка серверов
+- name: Basic server setup
   hosts: all:!hq
   become: true
   roles:

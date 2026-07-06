@@ -5,40 +5,40 @@
   become: true
 
   tasks:
-    - name: Получить настроенные DNS-серверы
+    - name: Get configured DNS servers
       ansible.builtin.command: resolvectl dns
       register: dns_servers
       changed_when: false
 
-    - name: Показать DNS
+    - name: Display DNS
       ansible.builtin.debug:
         msg: "{{ dns_servers.stdout_lines }}"
 
-    - name: Проверить разрешение через системный DNS
+    - name: Check resolution via system DNS
       ansible.builtin.command: getent hosts google.com
       register: dns_lookup
       changed_when: false
 
-    - name: Показать результат разрешения
+    - name: Display resolution result
       ansible.builtin.debug:
         var: dns_lookup.stdout
 
-    - name: Проверить доступность внутреннего DNS
+    - name: Check internal DNS availability
       ansible.builtin.command: dig @{{ hostvars[groups['net_service'][0]].ansible_host }} google.com +short
       register: dig_internal
       changed_when: false
 
-    - name: Показать ответ внутреннего DNS
+    - name: Display internal DNS response
       ansible.builtin.debug:
         var: dig_internal.stdout
 
-    - name: Проверить dnsmasq
+    - name: Check dnsmasq
       ansible.builtin.command: systemctl is-active dnsmasq
       when: inventory_hostname in groups["net_service"]
       register: dnsmasq_status
       changed_when: false
 
-    - name: Показать статус dnsmasq
+    - name: Display dnsmasq status
       ansible.builtin.debug:
         var: dnsmasq_status.stdout
       when: inventory_hostname in groups["net_service"]

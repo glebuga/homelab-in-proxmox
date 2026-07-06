@@ -1,5 +1,5 @@
 ---
-- name: Установить базовые пакеты
+- name: Install base packages
   ansible.builtin.apt:
     update_cache: true
     state: present

@@ -1,5 +1,5 @@
 ---
-- name: Настройка DNS
+- name: Configure DNS
   hosts: net_service
   become: true
   roles:

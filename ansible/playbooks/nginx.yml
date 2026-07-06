@@ -1,4 +1,4 @@
-- name: Настройка nginx
+- name: Configure nginx
   hosts: nginx_nodes
   become: true
   roles:
