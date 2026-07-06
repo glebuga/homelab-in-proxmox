@@ -1,10 +1,4 @@
 ---
-- name: Настройка dns для сервисов
-  hosts: docker_nodes:nginx_nodes # пока у меня только два, поэтому записал явно
-  become: true
-  roles:
-    - dns_client
-
 - name: Настройка firewall
   hosts: all:!hq
   become: true

@@ -1,14 +1,11 @@
 bind-interfaces
-listen-address=127.0.0.1,{{ hostvars[inventory_hostname]['ansible_host'] }}
+listen-address=127.0.0.1,{{ ansible_host }}
 
-# Указываем кастомный файл с нашими DNS-записями
 addn-hosts=/etc/homelab.hosts
 
-# Локальный домен
 domain=lab.local
 local=/lab.local/
 
-# Не перенаправлять запросы без доменной зоны на внешние DNS
 domain-needed
 bogus-priv
 

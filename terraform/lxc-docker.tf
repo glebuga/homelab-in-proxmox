@@ -19,11 +19,10 @@ resource "proxmox_virtual_environment_container" "docker_bpg" {
   initialization {
     hostname = "docker"
 
-    # user_account { 
-    #   keys = [
-    #     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKAqVd707hD8ZeFLhA/Rj+JLb5p5g/MEpMLG7R5p/KLb admin@hq"
-    #   ]
-    # }
+    dns {
+      servers = [var.dns_server]
+      domain  = var.search_domain
+    }
 
     ip_config {
       ipv4 {

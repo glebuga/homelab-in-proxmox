@@ -1,0 +1,31 @@
+---
+- name: Установить Docker
+  ansible.builtin.apt:
+    name:
+      - docker.io
+    state: present
+    update_cache: true
+
+- name: Включить и запустить Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Запустить контейнер app1
+  community.docker.docker_container:
+    name: app1
+    image: traefik/whoami
+    state: started
+    restart_policy: unless-stopped
+    published_ports:
+      - "8081:80"
+
+- name: Запустить контейнер app2
+  community.docker.docker_container:
+    name: app2
+    image: traefik/whoami
+    state: started
+    restart_policy: unless-stopped
+    published_ports:
+      - "8082:80"

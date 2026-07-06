@@ -15,6 +15,11 @@ resource "proxmox_virtual_environment_container" "net_services_bpg" {
   initialization {
     hostname = "net-services"
 
+    dns {
+      servers = ["192.168.0.1"]
+      domain  = var.search_domain
+    }
+
     ip_config {
       ipv4 {
         address = "10.0.0.110/24"

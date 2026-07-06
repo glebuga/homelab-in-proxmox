@@ -13,6 +13,11 @@ resource "proxmox_virtual_environment_container" "nginx_bpg" {
   initialization {
     hostname = "nginx"
 
+    dns {
+      servers = [var.dns_server]
+      domain  = var.search_domain
+    }
+
     ip_config {
       ipv4 {
         address = "10.0.0.107/24"
