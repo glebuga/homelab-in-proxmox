@@ -1,17 +1,18 @@
 resource "proxmox_virtual_environment_container" "nginx_bpg" {
-  node_name = "proxmox"
-  vm_id     = 107
+
+  node_name = var.proxmox_node
+  vm_id     = var.nginx_container.vm_id
 
   clone {
-    vm_id = 900
+    vm_id = var.template_id
   }
 
-  started       = true
-  start_on_boot = true
-  unprivileged  = true
+  started       = var.nginx_container.start
+  start_on_boot = var.nginx_container.onboot
+  unprivileged  = !var.nginx_container.privileged
 
   initialization {
-    hostname = "nginx"
+    hostname = var.nginx_container.hostname
 
     dns {
       servers = [var.dns_server]
@@ -20,8 +21,8 @@ resource "proxmox_virtual_environment_container" "nginx_bpg" {
 
     ip_config {
       ipv4 {
-        address = "10.0.0.107/24"
-        gateway = "10.0.0.1"
+        address = var.nginx_container.ip_address
+        gateway = var.gateway
       }
     }
   }
@@ -32,11 +33,11 @@ resource "proxmox_virtual_environment_container" "nginx_bpg" {
   }
 
   cpu {
-    cores = 1
+    cores = var.nginx_container.cpu_cores
   }
 
   memory {
-    dedicated = 512
-    swap      = 512
+    dedicated = var.nginx_container.memory
+    swap      = var.nginx_container.swap
   }
 }

@@ -1,23 +1,24 @@
 resource "proxmox_virtual_environment_container" "docker_bpg" {
   depends_on = [proxmox_virtual_environment_container.nginx_bpg]
 
-  node_name = "proxmox"
-  vm_id     = 105
+  node_name = var.proxmox_node
+  vm_id     = var.docker_container.vm_id
 
   clone {
-    vm_id = 900
+    vm_id = var.template_id
   }
 
-  started       = true
-  start_on_boot = true
-  unprivileged  = true
+  started       = var.docker_container.start
+  start_on_boot = var.docker_container.onboot
+  unprivileged  = !var.docker_container.privileged
 
   features {
     nesting = true
   }
 
   initialization {
-    hostname = "docker"
+
+    hostname = var.docker_container.hostname
 
     dns {
       servers = [var.dns_server]
@@ -26,8 +27,8 @@ resource "proxmox_virtual_environment_container" "docker_bpg" {
 
     ip_config {
       ipv4 {
-        address = "10.0.0.105/24"
-        gateway = "10.0.0.1"
+        address = var.docker_container.ip_address
+        gateway = var.gateway
       }
     }
   }
@@ -38,11 +39,11 @@ resource "proxmox_virtual_environment_container" "docker_bpg" {
   }
 
   cpu {
-    cores = 2
+    cores = var.docker_container.cpu_cores
   }
 
   memory {
-    dedicated = 2048
-    swap      = 512
+    dedicated = var.docker_container.memory
+    swap      = var.docker_container.swap
   }
 }
