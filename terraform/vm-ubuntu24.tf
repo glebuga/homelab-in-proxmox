@@ -1,21 +1,25 @@
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
+  for_each = {
+    for vm in var.ubuntu_vms : vm.vm_id => vm
+  }
+
   node_name = var.proxmox_node
-  vm_id     = var.ubuntu_vm.vm_id
-  name      = var.ubuntu_vm.hostname
+  vm_id     = each.value.vm_id
+  name      = each.value.hostname
 
   clone {
     vm_id = var.vm_template_id
   }
 
-  started = var.ubuntu_vm.start
+  started = var.vm_start
 
   cpu {
-    cores = var.ubuntu_vm.cpu_cores
+    cores = var.vm_cpu_cores
   }
 
   memory {
-    dedicated = var.ubuntu_vm.memory
+    dedicated = var.vm_memory
   }
 
   network_device {
@@ -31,7 +35,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
     ip_config {
       ipv4 {
-        address = var.ubuntu_vm.ip_address
+        address = each.value.ip_address
         gateway = var.gateway
       }
     }
