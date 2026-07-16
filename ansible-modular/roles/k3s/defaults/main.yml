@@ -1,9 +1,6 @@
 ---
 k3s_version: "v1.36.2+k3s1"
 
-# Role of this host. Auto-detected: the first host in the `kuber` group
-# (or any host whose name contains "master") is the master; the rest are
-# workers. Override per-host via host_vars if your naming differs.
 k3s_role: "{{ 'master' if (inventory_hostname is search('master') or inventory_hostname == groups['kuber'][0]) else 'worker' }}"
 
 # IP/hostname the worker uses to reach the master API server.
@@ -23,5 +20,4 @@ k3s_extra_args: ""
 # /usr/local/bin/k3s (useful in restricted networks).
 k3s_skip_download: false
 
-# Populated internally by the role; do not set manually.
 k3s_node_token: ""

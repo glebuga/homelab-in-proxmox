@@ -1,13 +1,9 @@
 ---
-# Tunables for the bootstrap role. Override via group_vars/host_vars.
 admin_user: admin
 timezone: Europe/Moscow
 locale: en_US.UTF-8
 
-# Public SSH keys copied to the admin user's authorized_keys.
-# Defaults to the controller user's ed25519 key if present.
 ssh_public_keys:
   - "{{ lookup('file', '~/.ssh/id_ed25519.pub', errors='ignore') | default('', true) }}"
 
-# User used only for the very first connection.
 bootstrap_user: root

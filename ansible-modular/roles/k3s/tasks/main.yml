@@ -1,8 +1,4 @@
 ---
-# Install and join a k3s cluster.
-#   master: runs the k3s server (control plane)
-#   worker: runs the k3s agent, joins the master using its node-token
-# The node token is read from the master at runtime (never hardcoded).
 
 - name: Determine node role
   ansible.builtin.set_fact:

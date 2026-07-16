@@ -1,7 +1,5 @@
 ---
-# DNS server (dnsmasq) configuration
-# Must match the search_domain configured in terraform-modular (home.local),
-# otherwise clients searching for *.home.local won't resolve the served records.
+
 dns_domain: home.local
 dns_upstream_servers:
   - 192.168.0.1

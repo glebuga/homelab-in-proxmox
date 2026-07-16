@@ -1,11 +1,4 @@
 ---
-# Master playbook for the homelab.
-# Runs after `bootstrap.yml`; connects as the admin user (ansible_user).
-#
-# Order matters: the DNS server (net_service) must be up BEFORE `common`,
-# because client containers already point their resolver at the internal
-# DNS server (set by Terraform). If common's apt ran before dnsmasq is
-# serving, package installs would fail to resolve.
 
 - name: Configure DNS server
   hosts: net_service

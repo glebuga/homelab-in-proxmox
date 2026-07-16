@@ -1,8 +1,4 @@
 ---
-# Initial host bootstrap: hostname, timezone, admin user, and SSH hardening.
-# Runs once as bootstrap_user (root); subsequent playbooks connect as
-# ansible_user (admin). No packages are installed here, so there is no
-# apt/dnf cache update (the common role handles package installs later).
 
 - name: Set hostname
   ansible.builtin.hostname:

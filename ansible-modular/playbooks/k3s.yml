@@ -1,12 +1,4 @@
 ---
-# Deploy a k3s cluster across the `kuber` group.
-# The first host in `kuber` becomes the master (control plane); the rest
-# join as workers. The node token is read from the master at runtime and
-# shared via set_fact (cacheable) — it is never hardcoded.
-#
-# Run order matters: master must be installed before workers join.
-# Usage:
-#   ansible-playbook -i inventory/terraform_inventory.py playbooks/k3s.yml
 
 - name: Install k3s master
   hosts: kuber[0]
