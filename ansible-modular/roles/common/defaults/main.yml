@@ -23,9 +23,6 @@ common_packages:
 common_upgrade: false
 common_upgrade_mode: "dist"
 
-# Автообновления security отключены, т.к. пакет unattended-upgrades пока не ставлю
-common_unattended_upgrades: false
-
 # Базовый .bashrc для admin
 common_shell_config: false
 

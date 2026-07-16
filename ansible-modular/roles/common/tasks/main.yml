@@ -31,13 +31,6 @@
     state: started
   when: ansible_service_mgr == 'systemd'
 
-- name: Enable unattended-upgrades timer
-  ansible.builtin.systemd:
-    name: apt-daily-upgrade.timer
-    enabled: true
-    state: started
-  when: common_unattended_upgrades | bool
-
 - name: Configure base shell for admin user
   ansible.builtin.template:
     src: bashrc.j2
