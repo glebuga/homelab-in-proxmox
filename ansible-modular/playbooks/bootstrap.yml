@@ -1,0 +1,12 @@
+---
+- name: Bootstrap new hosts (initial setup + connection)
+  hosts: all:!hq
+  become: true
+  gather_facts: true
+  # Connect as bootstrap_user (root) for the first setup. Play-level
+  # ansible_user overrides the inventory ansible_user (admin), so the
+  # bootstrap can reach the host before the admin user exists.
+  vars:
+    ansible_user: "{{ bootstrap_user | default('root') }}"
+  roles:
+    - bootstrap

@@ -1,0 +1,4 @@
+---
+# OS-family-dependent values, resolved at runtime.
+sudo_group: "{{ 'wheel' if ansible_os_family == 'RedHat' else 'sudo' }}"
+ssh_service: "{{ 'sshd' if ansible_os_family == 'RedHat' else 'ssh' }}"

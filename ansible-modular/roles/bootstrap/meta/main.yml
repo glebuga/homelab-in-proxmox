@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: gvinogradov
+  description: Initial host bootstrap (admin user, SSH hardening)
+  license: gvinogradov
+  min_ansible_version: "2.10"
+  galaxy_tags:
+    - bootstrap
+    - ssh
+    - security
+dependencies: []

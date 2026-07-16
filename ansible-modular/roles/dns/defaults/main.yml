@@ -1,0 +1,14 @@
+---
+# DNS server (dnsmasq) configuration
+# Must match the search_domain configured in terraform-modular (home.local),
+# otherwise clients searching for *.home.local won't resolve the served records.
+dns_domain: home.local
+dns_upstream_servers:
+  - 192.168.0.1
+  - 8.8.8.8
+  - 1.1.1.1
+dns_listen_addresses:
+  - 127.0.0.1
+  - "{{ ansible_host }}"
+dns_hosts_file: /etc/homelab.hosts
+dns_config_file: /etc/dnsmasq.d/homelab.conf

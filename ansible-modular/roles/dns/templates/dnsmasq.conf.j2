@@ -1,0 +1,14 @@
+bind-interfaces
+listen-address={{ dns_listen_addresses | join(',') }}
+
+addn-hosts={{ dns_hosts_file }}
+
+domain={{ dns_domain }}
+local=/{{ dns_domain }}/
+
+domain-needed
+bogus-priv
+
+{% for server in dns_upstream_servers %}
+server={{ server }}
+{% endfor %}

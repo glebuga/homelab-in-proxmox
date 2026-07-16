@@ -1,0 +1,10 @@
+---
+galaxy_info:
+  author: gvinogradov
+  description: dnsmasq DNS server for the homelab
+  license: gvinogradov
+  min_ansible_version: "2.10"
+  galaxy_tags:
+    - dns
+    - dnsmasq
+dependencies: []

@@ -1,0 +1,44 @@
+================================================================
+ Homelab Inventory Report
+ Generated: 2026-07-16 11:26:48
+ Source: terraform -chdir=../terraform-modular output -json
+================================================================
+
+HOSTS
+----------------------------------------------------------------
+Name            IP              Groups               User    Bootstrap Conn
+----------------------------------------------------------------
+dns             10.0.0.104      net_service          admin   root      ssh
+docker          10.0.0.102      docker_nodes         admin   root      ssh
+gitlab          10.0.0.105      gitlab_node          admin   root      ssh
+hq              127.0.0.1       local                -       -         local
+k3s-205         10.0.0.205      kuber                admin   root      ssh
+k3s-206         10.0.0.206      kuber                admin   root      ssh
+nginx           10.0.0.103      nginx_nodes          admin   root      ssh
+vm-202          10.0.0.202      ubuntu_vms           admin   -         ssh
+vm-203          10.0.0.203      ubuntu_vms           admin   -         ssh
+vm-204          10.0.0.204      ubuntu_vms           admin   -         ssh
+
+DNS
+----------------------------------------------------------------
+dns             -> 192.168.0.1 (upstream router, authoritative)
+docker          -> 10.0.0.104 (internal dnsmasq)
+gitlab          -> 10.0.0.104 (internal dnsmasq)
+hq              -> local
+k3s-205         -> 192.168.0.1 (router, by design)
+k3s-206         -> 192.168.0.1 (router, by design)
+nginx           -> 10.0.0.104 (internal dnsmasq)
+vm-202          -> 10.0.0.104 (internal dnsmasq)
+vm-203          -> 10.0.0.104 (internal dnsmasq)
+vm-204          -> 10.0.0.104 (internal dnsmasq)
+
+GROUPS
+----------------------------------------------------------------
+nginx_nodes    : nginx
+docker_nodes   : docker
+net_service    : dns
+gitlab_node    : gitlab
+kuber          : k3s-205, k3s-206
+ubuntu_vms     : vm-202, vm-203, vm-204
+local          : hq
+

@@ -1,6 +1,6 @@
 output "ipv4" {
   description = "Primary IPv4 address of the container (eth0)"
-  value       = proxmox_virtual_environment_container.this.ipv4["eth0"]
+  value = split("/", var.ip_address)[0]
 }
 
 output "vm_id" {

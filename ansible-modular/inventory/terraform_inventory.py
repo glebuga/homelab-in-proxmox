@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+"""Dynamic Ansible inventory generated from Terraform outputs.
+
+Reads `terraform -chdir=../terraform-modular output -json` and maps the
+resulting IP addresses to Ansible groups that mirror the previous static
+inventory (docker_nodes, net_service, nginx_nodes, gitlab_node, kuber,
+ubuntu_vms) plus a local `hq` group for the control host.
+
+Supports the Ansible dynamic inventory contract:
+    --list   -> full inventory JSON
+    --host X -> empty host vars JSON (all vars live in _meta)
+"""
+from __future__ import annotations
+
+import datetime
+import json
+import os
+import subprocess
+import sys
+
+# terraform-modular lives alongside ansible-modular (one level up).
+TERRAFORM_DIR = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "terraform-modular")
+)
+
+
+def _terraform_output():
+    """Return terraform outputs as {name: value}, or {} if unavailable."""
+    try:
+        result = subprocess.run(
+            ["terraform", "-chdir=" + TERRAFORM_DIR, "output", "-json"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError) as exc:
+        sys.stderr.write(
+            "WARNING: could not read terraform output from %s: %s\n"
+            "         run 'terraform apply' in terraform-modular/ first.\n" % (TERRAFORM_DIR, exc)
+        )
+        return {}
+    try:
+        raw = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        sys.stderr.write("WARNING: failed to parse terraform output: %s\n" % exc)
+        return {}
+    return {key: data.get("value") for key, data in raw.items()}
+
+
+def _first_ip(value):
+    """Extract a single IPv4 string from a terraform output value.
+
+    Handles plain strings, lists (e.g. proxmox ``ipv4_addresses``) and dicts.
+    """
+    if isinstance(value, str):
+        return value or None
+    if isinstance(value, list):
+        for item in value:
+            ip = _first_ip(item)
+            if ip:
+                return ip
+        return None
+    if isinstance(value, dict):
+        for v in value.values():
+            ip = _first_ip(v)
+            if ip:
+                return ip
+    return None
+
+
+def build_inventory():
+    out = _terraform_output()
+
+    groups = {
+        "nginx_nodes": [],
+        "docker_nodes": [],
+        "net_service": [],
+        "gitlab_node": [],
+        "kuber": [],
+        "ubuntu_vms": [],
+        "local": ["hq"],
+    }
+    hostvars = {}
+
+    def add(host, ip, group):
+        if not host or not ip:
+            return
+        groups[group].append(host)
+        hostvars[host] = {
+            "ansible_host": ip,
+            "bootstrap_user": "root",
+            "ansible_user": "admin",
+        }
+
+    add("nginx", _first_ip(out.get("nginx_ip")), "nginx_nodes")
+    add("docker", _first_ip(out.get("docker_ip")), "docker_nodes")
+    add("dns", _first_ip(out.get("dns_ip")), "net_service")
+    add("gitlab", _first_ip(out.get("gitlab_ip")), "gitlab_node")
+
+    for vm_id, ip in (out.get("k3s_vm_ips") or {}).items():
+        add("k3s-%s" % vm_id, _first_ip(ip), "kuber")
+
+    for vm_id, ip in (out.get("ubuntu_vm_ips") or {}).items():
+        ip = _first_ip(ip)
+        if ip:
+            host = "vm-%s" % vm_id
+            groups["ubuntu_vms"].append(host)
+            hostvars[host] = {"ansible_host": ip, "ansible_user": "admin"}
+
+    hostvars["hq"] = {
+        "ansible_connection": "local",
+        "ansible_host": "127.0.0.1",
+    }
+
+    return {
+        "all": {
+            "vars": {
+                "timezone": "Europe/Moscow",
+                "locale": "en_US.UTF-8",
+                "proxmox": "192.168.0.200",
+                "management_ip": "10.0.0.2",
+            }
+        },
+        **groups,
+        "_meta": {"hostvars": hostvars},
+    }
+
+
+def write_report(inv, path):
+    """Write a human-readable hosts report next to the inventory script."""
+    groups = {g: hosts for g, hosts in inv.items() if isinstance(hosts, list)}
+    hostvars = inv.get("_meta", {}).get("hostvars", {})
+
+    # host -> list of groups
+    host_groups = {}
+    for g, hosts in groups.items():
+        for h in hosts:
+            host_groups.setdefault(h, []).append(g)
+
+    def dns_for(host, grps):
+        if host == "hq":
+            return "local"
+        if "net_service" in grps:
+            return "192.168.0.1 (upstream router, authoritative)"
+        if "kuber" in grps:
+            return "192.168.0.1 (router, by design)"
+        return "10.0.0.104 (internal dnsmasq)"
+
+    lines = []
+    lines.append("=" * 64)
+    lines.append(" Homelab Inventory Report")
+    lines.append(" Generated: %s" % datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    lines.append(" Source: terraform -chdir=../terraform-modular output -json")
+    lines.append("=" * 64)
+    lines.append("")
+    lines.append("HOSTS")
+    lines.append("-" * 64)
+    lines.append("%-15s %-15s %-20s %-7s %-9s %s" % ("Name", "IP", "Groups", "User", "Bootstrap", "Conn"))
+    lines.append("-" * 64)
+    for host in sorted(host_groups):
+        hv = hostvars.get(host, {})
+        ip = hv.get("ansible_host", "-")
+        grps = host_groups[host]
+        user = hv.get("ansible_user", "-")
+        boot = hv.get("bootstrap_user", "-")
+        conn = hv.get("ansible_connection", "ssh")
+        lines.append("%-15s %-15s %-20s %-7s %-9s %s" % (
+            host, ip, ",".join(grps), user, boot, conn))
+    lines.append("")
+    lines.append("DNS")
+    lines.append("-" * 64)
+    for host in sorted(host_groups):
+        lines.append("%-15s -> %s" % (host, dns_for(host, host_groups[host])))
+    lines.append("")
+    lines.append("GROUPS")
+    lines.append("-" * 64)
+    for g, hosts in groups.items():
+        if hosts:
+            lines.append("%-14s : %s" % (g, ", ".join(hosts)))
+    lines.append("")
+
+    try:
+        with open(path, "w") as fh:
+            fh.write("\n".join(lines) + "\n")
+    except OSError as exc:
+        sys.stderr.write("WARNING: could not write report to %s: %s\n" % (path, exc))
+
+
+def main(argv):
+    if len(argv) > 1 and argv[1] == "--host":
+        print(json.dumps({}))
+        return 0
+    if len(argv) > 1 and argv[1] == "--list":
+        inv = build_inventory()
+        print(json.dumps(inv))
+        report_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "hosts_report.txt"
+        )
+        write_report(inv, report_path)
+        return 0
+    sys.stderr.write("usage: terraform_inventory.py [--list | --host <host>]\n")
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))

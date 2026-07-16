@@ -1,0 +1,34 @@
+---
+# Base OS configuration applied to all hosts after bootstrap.
+common_packages:
+  - curl
+  - vim
+  - htop
+  - tree
+  # Раскомментируйте по мере необходимости:
+  # - git
+  # - jq
+  # - tmux
+  # - wget
+  # - ca-certificates
+  # - gnupg
+  # - lsb-release
+  # - acl
+  # - net-tools
+  # - python3
+  # - sudo
+  # - unattended-upgrades
+
+# Не обновлять установленные пакеты
+common_upgrade: false
+common_upgrade_mode: "dist"
+
+# Автообновления security отключены, т.к. пакет unattended-upgrades пока не ставлю
+common_unattended_upgrades: false
+
+# Базовый .bashrc для admin
+common_shell_config: false
+
+common_ntp_servers:
+  - 0.pool.ntp.org
+  - 1.pool.ntp.org

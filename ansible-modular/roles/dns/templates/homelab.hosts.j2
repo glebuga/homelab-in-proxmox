@@ -1,0 +1,5 @@
+{% for host in groups['all'] %}
+{% if hostvars[host].ansible_host is defined and hostvars[host].ansible_connection | default('ssh') != 'local' %}
+{{ hostvars[host].ansible_host }} {{ host }}.{{ dns_domain }} {{ host }}
+{% endif %}
+{% endfor %}

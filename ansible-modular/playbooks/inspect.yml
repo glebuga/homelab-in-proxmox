@@ -1,0 +1,20 @@
+---
+- name: Inspect hosts (IP, FQDN, configured DNS resolver)
+  hosts: all
+  become: false
+  gather_facts: true
+
+  tasks:
+    - name: Read /etc/resolv.conf
+      ansible.builtin.slurp:
+        path: /etc/resolv.conf
+      register: resolv_conf
+
+    - name: Show IP, domain and DNS servers
+      ansible.builtin.debug:
+        msg: |
+          Host  : {{ inventory_hostname }}
+          IP    : {{ ansible_host | default(ansible_default_ipv4.address | default('n/a')) }}
+          FQDN  : {{ ansible_fqdn }}
+          Domain: {{ ansible_domain | default('(none)') }}
+          DNS   : {{ resolv_conf.content | b64decode | regex_findall('nameserver\s+(\S+)') | join(', ') }}
