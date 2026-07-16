@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-"""Dynamic Ansible inventory generated from Terraform outputs.
 
-Reads `terraform -chdir=../terraform-modular output -json` and maps the
-resulting IP addresses to Ansible groups that mirror the previous static
-inventory (docker_nodes, net_service, nginx_nodes, gitlab_node, kuber,
-ubuntu_vms) plus a local `hq` group for the control host.
-
-Supports the Ansible dynamic inventory contract:
-    --list   -> full inventory JSON
-    --host X -> empty host vars JSON (all vars live in _meta)
-"""
 from __future__ import annotations
 
 import datetime
@@ -18,10 +8,22 @@ import os
 import subprocess
 import sys
 
+import yaml
+
 # terraform-modular lives alongside ansible-modular (one level up).
 TERRAFORM_DIR = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "terraform-modular")
 )
+# mapping.yml lives next to this script.
+MAPPING_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mapping.yml")
+
+# Global vars applied to the `all` group.
+GLOBAL_VARS = {
+    "timezone": "Europe/Moscow",
+    "locale": "en_US.UTF-8",
+    "proxmox": "192.168.0.200",
+    "management_ip": "10.0.0.2",
+}
 
 
 def _terraform_output():
@@ -68,59 +70,67 @@ def _first_ip(value):
     return None
 
 
+def _load_mapping():
+    """Load the declarative host mapping from mapping.yml."""
+    try:
+        with open(MAPPING_FILE) as fh:
+            return yaml.safe_load(fh) or {}
+    except OSError as exc:
+        sys.stderr.write("WARNING: could not read mapping file %s: %s\n" % (MAPPING_FILE, exc))
+        return {}
+
+
 def build_inventory():
     out = _terraform_output()
+    mapping = _load_mapping()
 
-    groups = {
-        "nginx_nodes": [],
-        "docker_nodes": [],
-        "net_service": [],
-        "gitlab_node": [],
-        "kuber": [],
-        "ubuntu_vms": [],
-        "local": ["hq"],
-    }
-    hostvars = {}
+    # Collect every group mentioned in the mapping so empty groups still exist.
+    groups: dict[str, list[str]] = {}
+    for spec in mapping.values():
+        for g in spec.get("groups", []):
+            groups.setdefault(g, [])
 
-    def add(host, ip, group):
+    hostvars: dict[str, dict] = {}
+
+    def _register(host, ip, spec):
         if not host or not ip:
             return
-        groups[group].append(host)
-        hostvars[host] = {
-            "ansible_host": ip,
-            "bootstrap_user": "root",
-            "ansible_user": "admin",
-        }
+        for g in spec.get("groups", []):
+            groups.setdefault(g, [])
+            if host not in groups[g]:
+                groups[g].append(host)
+        hv = {"ansible_host": ip}
+        if spec.get("bootstrap"):
+            hv["bootstrap_user"] = "root"
+        hv["ansible_user"] = spec.get("user", "admin")
+        hostvars[host] = hv
 
-    add("nginx", _first_ip(out.get("nginx_ip")), "nginx_nodes")
-    add("docker", _first_ip(out.get("docker_ip")), "docker_nodes")
-    add("dns", _first_ip(out.get("dns_ip")), "net_service")
-    add("gitlab", _first_ip(out.get("gitlab_ip")), "gitlab_node")
+    for out_key, spec in mapping.items():
+        value = out.get(out_key)
+        if value is None:
+            continue
+        if spec.get("host"):
+            # Simple host: output is a single IP / string.
+            _register(spec["host"], _first_ip(value), spec)
+        elif spec.get("host_prefix"):
+            # VM dict: output is keyed by vm_id -> build name dynamically.
+            prefix = spec["host_prefix"]
+            for vm_id, ip in (value or {}).items():
+                _register("%s%s" % (prefix, vm_id), _first_ip(ip), spec)
+        else:
+            sys.stderr.write(
+                "WARNING: mapping entry '%s' needs 'host' or 'host_prefix'\n" % out_key
+            )
 
-    for vm_id, ip in (out.get("k3s_vm_ips") or {}).items():
-        add("k3s-%s" % vm_id, _first_ip(ip), "kuber")
-
-    for vm_id, ip in (out.get("ubuntu_vm_ips") or {}).items():
-        ip = _first_ip(ip)
-        if ip:
-            host = "vm-%s" % vm_id
-            groups["ubuntu_vms"].append(host)
-            hostvars[host] = {"ansible_host": ip, "ansible_user": "admin"}
-
+    # Local control host (hq) is always present, never from terraform.
+    groups["local"] = ["hq"]
     hostvars["hq"] = {
         "ansible_connection": "local",
         "ansible_host": "127.0.0.1",
     }
 
     return {
-        "all": {
-            "vars": {
-                "timezone": "Europe/Moscow",
-                "locale": "en_US.UTF-8",
-                "proxmox": "192.168.0.200",
-                "management_ip": "10.0.0.2",
-            }
-        },
+        "all": {"vars": dict(GLOBAL_VARS)},
         **groups,
         "_meta": {"hostvars": hostvars},
     }

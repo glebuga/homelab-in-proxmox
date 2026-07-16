@@ -1,6 +1,6 @@
 ================================================================
  Homelab Inventory Report
- Generated: 2026-07-16 16:45:56
+ Generated: 2026-07-16 17:47:57
  Source: terraform -chdir=../terraform-modular output -json
 ================================================================
 
@@ -12,8 +12,8 @@ dns             10.0.0.104      net_service          admin   root      ssh
 docker          10.0.0.102      docker_nodes         admin   root      ssh
 gitlab          10.0.0.105      gitlab_node          admin   root      ssh
 hq              127.0.0.1       local                -       -         local
-k3s-205         10.0.0.205      kuber                admin   root      ssh
-k3s-206         10.0.0.206      kuber                admin   root      ssh
+k3s-205         10.0.0.205      kuber                admin   -         ssh
+k3s-206         10.0.0.206      kuber                admin   -         ssh
 nginx           10.0.0.103      nginx_nodes          admin   root      ssh
 vm-202          10.0.0.202      ubuntu_vms           admin   -         ssh
 vm-203          10.0.0.203      ubuntu_vms           admin   -         ssh
