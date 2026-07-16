@@ -1,8 +1,0 @@
----
-- hosts: all
-  gather_facts: yes
-
-  tasks:
-    - name: Проверка активного пользователя
-      debug:
-        msg: "Ansible зашел под: {{ ansible_user_id }} (а подключался как: {{ ansible_env.USER | default('N/A') }})"

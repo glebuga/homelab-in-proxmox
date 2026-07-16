@@ -1,5 +1,0 @@
-{% for host in groups['all'] %}
-{% if 'ansible_host' in hostvars[host] %}
-{{ hostvars[host].ansible_host }} {{ host }}.lab.local {{ host }}
-{% endif %}
-{% endfor %}
