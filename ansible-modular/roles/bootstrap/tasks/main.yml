@@ -37,6 +37,7 @@
     exclusive: false
   loop: "{{ ssh_public_keys }}"
   when: item | length > 0
+  no_log: true
 
 - name: Allow passwordless sudo
   ansible.builtin.copy:
