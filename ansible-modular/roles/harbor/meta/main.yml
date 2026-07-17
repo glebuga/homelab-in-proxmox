@@ -9,4 +9,5 @@ galaxy_info:
     - registry
     - docker
     - container
-dependencies: []
+dependencies:
+  - role: docker

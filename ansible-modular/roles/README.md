@@ -21,7 +21,8 @@ roles/<имя>/
 | `bootstrap` | **готово**  | Начальная настройка хоста: admin, SSH, sudo.|
 | `common`    | **готово**  | Базовая настройка ОС: пакеты, NTP, автообновления. |
 | `dns`       | **готово**  | DNS-сервер dnsmasq (net_service).           |
-| `docker`    | заготовка   | Docker + контейнеры.                        |
+| `docker`    | **готово**  | Docker + compose-plugin. Единый источник установки Docker; другие роли (harbor) зависят от неё. |
+| `harbor`    | **готово**  | Harbor registry over HTTPS (docker compose). Зависит от `docker`. |
 | `firewall`  | заготовка   | Правила iptables.                           |
 | `nginx`     | заготовка   | Reverse-proxy Nginx.                        |
 | `etcd`      | заготовка   | Кластер etcd.                               |
@@ -29,5 +30,16 @@ roles/<имя>/
 
 Заготовки ролей содержат только пустые `main.yml`; реализуйте их по одной по
 мере необходимости. См. [`bootstrap/README.md`](bootstrap/README.md) для
-единственной полностью реализованной роли.
-| `harbor`    | **готово**  | Harbor registry over HTTPS (docker compose).            |
+примеров полностью реализованной роли.
+
+## Единый источник правды (SSOT)
+
+- **Глобальные переменные** (`timezone`, `locale`, `admin_user`,
+  `bootstrap_user`, `proxmox`, `management_ip`) определены один раз в
+  [`inventory/group_vars/all/main.yml`](../inventory/group_vars/all/main.yml).
+  Роли ссылаются на них напрямую и не переопределяют.
+- **Docker** устанавливается только ролью `docker`. Роль `harbor` объявляет
+  её как зависимость в `meta/main.yml` и не дублирует установку Docker.
+- **Секреты** Harbor (`harbor_admin_password`, `harbor_db_password`)
+  хранятся в зашифрованном `inventory/group_vars/harbor_nodes/vault.yml`
+  и не дублируются в открытых файлах.

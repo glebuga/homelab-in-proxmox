@@ -17,13 +17,8 @@ TERRAFORM_DIR = os.path.normpath(
 # mapping.yml lives next to this script.
 MAPPING_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mapping.yml")
 
-# Global vars applied to the `all` group.
-GLOBAL_VARS = {
-    "timezone": "Europe/Moscow",
-    "locale": "en_US.UTF-8",
-    "proxmox": "192.168.0.200",
-    "management_ip": "10.0.0.2",
-}
+DEFAULT_ADMIN_USER = "admin"
+DEFAULT_BOOTSTRAP_USER = "root"
 
 
 def _terraform_output():
@@ -101,8 +96,8 @@ def build_inventory():
                 groups[g].append(host)
         hv = {"ansible_host": ip}
         if spec.get("bootstrap"):
-            hv["bootstrap_user"] = "root"
-        hv["ansible_user"] = spec.get("user", "admin")
+            hv["bootstrap_user"] = DEFAULT_BOOTSTRAP_USER
+        hv["ansible_user"] = spec.get("user", DEFAULT_ADMIN_USER)
         hostvars[host] = hv
 
     for out_key, spec in mapping.items():
@@ -129,8 +124,9 @@ def build_inventory():
         "ansible_host": "127.0.0.1",
     }
 
+    # No global vars here — they come from inventory/group_vars/all/main.yml.
     return {
-        "all": {"vars": dict(GLOBAL_VARS)},
+        "all": {"vars": {}},
         **groups,
         "_meta": {"hostvars": hostvars},
     }

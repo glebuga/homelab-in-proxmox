@@ -30,3 +30,10 @@ __pycache__/
 .vscode/
 
 script_info.md
+# Harbor TLS certificates (generated externally, never commit)
+ansible-modular/certs/harbor/*.crt
+ansible-modular/certs/harbor/*.key
+ansible-modular/certs/harbor/*.pem
+
+# Harbor offline installer archive
+ansible-modular/harbor-installer/

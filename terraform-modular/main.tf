@@ -136,3 +136,26 @@ module "k3s_vms" {
     }
   }
 }
+
+module "harbor" {
+  source = "./modules/lxc"
+
+  depends_on = [module.net_services]
+
+  proxmox_node    = var.proxmox_node
+  template_id     = var.template_id
+  vm_id           = var.harbor_container.vm_id
+  hostname        = var.harbor_container.hostname
+  ip_address      = var.harbor_container.ip_address
+  gateway         = var.gateway
+  dns_server      = var.dns_server
+  search_domain   = var.search_domain
+  cpu_cores       = var.harbor_container.cpu_cores
+  memory          = var.harbor_container.memory
+  swap            = var.harbor_container.swap
+  disk_size       = var.harbor_container.disk_size
+  start           = var.harbor_container.start
+  onboot          = var.harbor_container.onboot
+  privileged      = var.harbor_container.privileged
+  enable_nesting  = true
+}

@@ -18,6 +18,13 @@
 Поэтому каждая команда `ansible-playbook` / `ansible-inventory` **сама
 запускает скрипт** — вручную его запускать не нужно.
 
+> Скрипт отвечает **только за топологию** (группы, IP, пользователи
+> подключения). Глобальные переменные (timezone, locale, admin_user,
+> bootstrap_user, proxmox, management_ip) больше НЕ задаются здесь — они
+> живут в [`group_vars/all/main.yml`](group_vars/all/main.yml) как единый
+> источник правды и применяются ко всем хостам стандартным механизмом
+> Ansible.
+
 ## Добавление новых машин (data-driven)
 
 Сопоставление «Terraform output → хост/группа Ansible» вынесено в
@@ -68,12 +75,7 @@
 ```json
 {
     "all": {
-        "vars": {
-            "timezone": "Europe/Moscow",
-            "locale": "en_US.UTF-8",
-            "proxmox": "192.168.0.200",
-            "management_ip": "10.0.0.2"
-        }
+        "vars": {}
     },
     "nginx_nodes": ["nginx"],
     "docker_nodes": ["docker"],
@@ -98,7 +100,8 @@
 
 - **Ключи верхнего уровня** (`nginx_nodes`, `docker_nodes`, ...) — это
   **группы**; каждая содержит список *имён* хостов в ней.
-- **`all.vars`** — переменные, применяемые ко всем хостам.
+- **`all.vars`** — пусто; глобальные переменные теперь берутся из
+  `inventory/group_vars/all/main.yml` (см. выше).
 - **`_meta.hostvars`** — данные подключения для каждого хоста:
   - `ansible_host` — IP-адрес (взят из Terraform)
   - `bootstrap_user: root` — используется только bootstrap playbook'ом

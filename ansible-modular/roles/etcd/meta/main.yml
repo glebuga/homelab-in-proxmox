@@ -1,8 +1,0 @@
----
-galaxy_info:
-  author: gvinogradov
-  description: etcd role
-  license: gvinogradov
-  min_ansible_version: "2.10"
-  galaxy_tags: []
-dependencies: []

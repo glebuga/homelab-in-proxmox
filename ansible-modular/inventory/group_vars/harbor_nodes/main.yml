@@ -6,7 +6,7 @@ harbor_hostname: "harbor.home.local"
 harbor_version: "v2.10.1"
 
 harbor_offline_installer: true
-harbor_local_installer_src: "{{ playbook_dir }}/../harbor-installer/harbor-offline-installer-{{ harbor_version }}.tgz"
+harbor_local_installer_src: "{{ ansible_modular_root }}/harbor-installer/harbor-offline-installer-{{ harbor_version }}.tgz"
 
 # Сетевые порты.
 harbor_http_port: 80
@@ -29,7 +29,7 @@ harbor_key_file: "harbor.key"
 
 # Локальный путь (на управляющей машине) к сгенерированным сертификатам.
 # Роль только КОПИРУЕТ их, не генерирует.
-harbor_local_cert_src: "{{ playbook_dir }}/../certs/harbor"
+harbor_local_cert_src: "{{ ansible_modular_root }}/certs/harbor"
 
 # Опциональные компоненты Harbor.
 harbor_with_trivy: true
@@ -38,3 +38,5 @@ harbor_with_chartmuseum: false
 
 # Имя проекта, который роль создаёт после установки (вместо дефолтного library).
 harbor_project_name: "gitlab"
+
+# Секреты (harbor_admin_password, harbor_db_password) определены в vault.yml

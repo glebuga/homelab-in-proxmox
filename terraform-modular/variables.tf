@@ -164,3 +164,19 @@ variable "k3s_vms" {
     disk_size  = number
   }))
 }
+
+variable "harbor_container" {
+  description = "Harbor LXC container"
+  type = object({
+    vm_id      = number
+    hostname   = string
+    ip_address = string
+    cpu_cores  = number
+    memory     = number
+    swap       = number
+    disk_size  = number
+    start      = bool
+    onboot     = bool
+    privileged = bool
+  })
+}

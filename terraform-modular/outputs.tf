@@ -32,3 +32,8 @@ output "k3s_vm_ips" {
 #   description = "IP-адрес VM Ubuntu"
 #   value       = values(module.ubuntu_vms.ipv4_addresses)[0]
 # }
+
+output "harbor_ip" {
+  description = "IP-адрес Harbor registry"
+  value       = module.harbor.ipv4
+}
