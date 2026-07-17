@@ -1,6 +1,6 @@
 ================================================================
  Homelab Inventory Report
- Generated: 2026-07-16 17:47:57
+ Generated: 2026-07-17 14:08:43
  Source: terraform -chdir=../terraform-modular output -json
 ================================================================
 
@@ -11,6 +11,7 @@ Name            IP              Groups               User    Bootstrap Conn
 dns             10.0.0.104      net_service          admin   root      ssh
 docker          10.0.0.102      docker_nodes         admin   root      ssh
 gitlab          10.0.0.105      gitlab_node          admin   root      ssh
+harbor          10.0.0.106      harbor_nodes         admin   root      ssh
 hq              127.0.0.1       local                -       -         local
 k3s-205         10.0.0.205      kuber                admin   -         ssh
 k3s-206         10.0.0.206      kuber                admin   -         ssh
@@ -24,6 +25,7 @@ DNS
 dns             -> 192.168.0.1 (upstream router, authoritative)
 docker          -> 10.0.0.104 (internal dnsmasq)
 gitlab          -> 10.0.0.104 (internal dnsmasq)
+harbor          -> 10.0.0.104 (internal dnsmasq)
 hq              -> local
 k3s-205         -> 192.168.0.1 (router, by design)
 k3s-206         -> 192.168.0.1 (router, by design)
@@ -40,5 +42,6 @@ net_service    : dns
 gitlab_node    : gitlab
 kuber          : k3s-205, k3s-206
 ubuntu_vms     : vm-202, vm-203, vm-204
+harbor_nodes   : harbor
 local          : hq
 

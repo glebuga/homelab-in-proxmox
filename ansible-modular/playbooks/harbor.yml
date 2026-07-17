@@ -1,0 +1,6 @@
+---
+- name: Deploy Harbor registry
+  hosts: harbor_nodes
+  become: true
+  roles:
+    - harbor

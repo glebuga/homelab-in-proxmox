@@ -39,3 +39,19 @@
     group: "{{ admin_user }}"
     mode: "0644"
   when: common_shell_config | bool
+
+- name: Detect root device (LXC only)
+  ansible.builtin.command:
+    cmd: "findmnt -n -o SOURCE /"
+  register: root_device
+  changed_when: false
+  when: ansible_virtualization_type == 'lxc'
+
+- name: Grow root filesystem to fill the disk (LXC only)
+  ansible.builtin.command:
+    cmd: "resize2fs {{ root_device.stdout | trim }}"
+  when:
+    - ansible_virtualization_type == 'lxc'
+    - root_device.stdout | trim | length > 0
+  changed_when: false
+  failed_when: false

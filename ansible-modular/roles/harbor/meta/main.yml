@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  author: gvinogradov
+  description: Harbor container registry over HTTPS (docker compose installer)
+  license: gvinogradov
+  min_ansible_version: "2.10"
+  galaxy_tags:
+    - harbor
+    - registry
+    - docker
+    - container
+dependencies: []

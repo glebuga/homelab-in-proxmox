@@ -1,0 +1,40 @@
+---
+# FQDN, используемый Harbor и совпадающий с CN TLS-сертификата.
+harbor_hostname: "harbor.home.local"
+
+# Версия Harbor (официальный релиз docker compose).
+harbor_version: "v2.10.1"
+
+harbor_offline_installer: true
+harbor_local_installer_src: "{{ playbook_dir }}/../harbor-installer/harbor-offline-installer-{{ harbor_version }}.tgz"
+
+# Сетевые порты.
+harbor_http_port: 80
+harbor_https_port: 443
+
+# Имя администратора (пароль — в vault.yml).
+# Harbor всегда использует логин "admin" — эта переменная
+# не читается самим Harbor и оставлена для справки.
+harbor_admin_username: "gvinogradov"
+
+# Каталог данных Harbor на хосте.
+harbor_data_volume: "/data"
+
+# Каталог с TLS-сертификатом внутри хоста Harbor.
+harbor_cert_dir: "/data/cert"
+
+# Имена файлов сертификата (должны лежать в harbor_local_cert_src).
+harbor_cert_file: "harbor.crt"
+harbor_key_file: "harbor.key"
+
+# Локальный путь (на управляющей машине) к сгенерированным сертификатам.
+# Роль только КОПИРУЕТ их, не генерирует.
+harbor_local_cert_src: "{{ playbook_dir }}/../certs/harbor"
+
+# Опциональные компоненты Harbor.
+harbor_with_trivy: true
+harbor_with_notary: false
+harbor_with_chartmuseum: false
+
+# Имя проекта, который роль создаёт после установки (вместо дефолтного library).
+harbor_project_name: "gitlab"

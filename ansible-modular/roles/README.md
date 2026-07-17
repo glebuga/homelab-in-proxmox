@@ -30,3 +30,4 @@ roles/<имя>/
 Заготовки ролей содержат только пустые `main.yml`; реализуйте их по одной по
 мере необходимости. См. [`bootstrap/README.md`](bootstrap/README.md) для
 единственной полностью реализованной роли.
+| `harbor`    | **готово**  | Harbor registry over HTTPS (docker compose).            |

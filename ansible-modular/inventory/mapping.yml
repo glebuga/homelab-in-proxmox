@@ -41,3 +41,8 @@ ubuntu_vm_ips:
 #   host: monitoring
 #   groups: [monitoring_group]
 #   bootstrap: true
+
+harbor_ip:
+  host: harbor
+  groups: [harbor_nodes]
+  bootstrap: true
