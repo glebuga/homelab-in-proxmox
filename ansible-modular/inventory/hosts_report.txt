@@ -1,6 +1,6 @@
 ================================================================
  Homelab Inventory Report
- Generated: 2026-07-17 14:08:43
+ Generated: 2026-07-17 14:25:37
  Source: terraform -chdir=../terraform-modular output -json
 ================================================================
 
