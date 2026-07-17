@@ -1,8 +1,7 @@
 ---
-# Install Docker Engine + docker compose plugin.
-# This is the single source of truth for Docker on all hosts that need it.
-# Roles like 'harbor' depend on this role rather than installing Docker
-# themselves.
+# Установка Docker Engine + docker compose plugin.
+# Это единственный источник правды по Docker на всех хостах, где он нужен.
+# Роли вроде 'harbor' зависят от этой роли, а не ставят Docker сами.
 
 - name: Install prerequisites for Docker repo
   ansible.builtin.apt:

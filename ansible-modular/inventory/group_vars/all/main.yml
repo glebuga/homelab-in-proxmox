@@ -1,22 +1,21 @@
 ---
 # ===========================================================================
-# Single source of truth for global (all-hosts) variables.
+# Единый источник глобальных переменных (для всех хостов).
 # ===========================================================================
 
-# Timezone and locale applied by the bootstrap/common roles.
+# Часовой пояс и локаль, применяются ролями bootstrap/common.
 timezone: "Europe/Moscow"
 locale: "en_US.UTF-8"
- 
+  
 admin_user: "admin"
 
-# User used only during the one-shot bootstrap playbook.
+# Пользователь, используемый только в одноразовом bootstrap-плейбуке.
 bootstrap_user: "root"
 
-# Infrastructure endpoints (proxmox node, management network gateway).
+# Инфраструктурные эндпоинты (узел proxmox, шлюз управляющей сети).
 proxmox: "192.168.0.200"
 # management_ip: "10.0.0.2"
 
-# Root directory of the ansible-modular project. Used to anchor external
-# asset paths (installers, certificates) so they no longer depend on CWD.
-# Resolved relative to this file's location to stay portable.
+# Корень проекта ansible-modular. Якорит внешние пути (инсталляторы,
+# сертификаты), чтобы они не зависели от текущей директории запуска.
 ansible_modular_root: "{{ playbook_dir | dirname if playbook_dir is defined else '.' }}"

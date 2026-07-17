@@ -1,11 +1,11 @@
 ---
-# Base OS configuration applied to all hosts after bootstrap.
+# Базовая настройка ОС, применяется ко всем хостам после bootstrap.
 common_packages:
   - curl
   - vim
   - htop
   - tree
-  # Раскомментируйте по мере необходимости:
+  # Раскомментируем по мере необходимости:
   # - git
   # - jq
   # - tmux
@@ -19,11 +19,11 @@ common_packages:
   # - sudo
   # - unattended-upgrades
 
-# Не обновлять установленные пакеты
+# Не обновлять установленные пакеты.
 common_upgrade: false
 common_upgrade_mode: "dist"
 
-# Базовый .bashrc для admin
+# Базовый .bashrc для admin.
 common_shell_config: false
 
 common_ntp_servers:

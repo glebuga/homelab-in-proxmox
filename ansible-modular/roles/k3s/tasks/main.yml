@@ -5,7 +5,7 @@
     k3s_is_master: "{{ k3s_role == 'master' }}"
 
 # ---------------------------------------------------------------------------
-# Master: install server
+# Master: установка сервера
 # ---------------------------------------------------------------------------
 - name: Install k3s server (master)
   when: k3s_is_master
@@ -47,7 +47,7 @@
         timeout: 180
 
 # ---------------------------------------------------------------------------
-# Worker: read token from master, install agent, join
+# Worker: чтение токена с master, установка агента, подключение
 # ---------------------------------------------------------------------------
 - name: Install k3s agent (worker)
   when: not k3s_is_master
@@ -96,7 +96,7 @@
       when: k3s_agent_install is not skipped
 
 # ---------------------------------------------------------------------------
-# Verification (master only)
+# Проверка (только master)
 # ---------------------------------------------------------------------------
 - name: Verify cluster state (master)
   when: k3s_is_master

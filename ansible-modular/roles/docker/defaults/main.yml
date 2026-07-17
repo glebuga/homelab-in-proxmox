@@ -1,19 +1,17 @@
 ---
-# Default variables for the docker role.
-# This role is the SINGLE OWNER of Docker + compose-plugin installation.
-# Other roles (e.g. harbor) must depend on this role instead of installing
-# Docker themselves.
+# Роль — ЕДИНСТВЕННЫЙ владелец установки Docker + compose-plugin.
+# Остальные роли (напр. harbor) должны зависеть от неё, а не ставить Docker сами.
 
-# Docker CE packages to install (engine, CLI, containerd, compose plugin).
+# Пакеты Docker CE для установки (engine, CLI, containerd, compose plugin).
 docker_packages:
   - docker-ce
   - docker-ce-cli
   - containerd.io
   - docker-compose-plugin
 
-# Users to add to the 'docker' group so they can run docker without sudo.
+# Пользователи в группе 'docker' (могут запускать docker без sudo).
 docker_users:
   - "{{ admin_user }}"
 
-# Enable and start the docker service on boot.
+# Включить и запустить сервис docker при загрузке.
 docker_enable_service: true

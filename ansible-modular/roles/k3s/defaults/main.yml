@@ -3,18 +3,18 @@ k3s_version: "v1.36.2+k3s1"
 
 k3s_role: "{{ 'master' if (inventory_hostname is search('master') or inventory_hostname == groups['kuber'][0]) else 'worker' }}"
 
-# IP/hostname the worker uses to reach the master API server.
+# IP/хост, по которому worker обращается к API-серверу master.
 k3s_master_ip: "{{ groups['kuber'][0] }}"
 
-# API server port.
+# Порт API-сервера.
 k3s_api_port: 6443
 
 k3s_disable_components: "traefik servicelb"
 
 k3s_extra_args: ""
 
-# Skip the installer's automatic binary download and use a pre-placed
-# /usr/local/bin/k3s.
+# Пропустить автозагрузку бинарника установщиком и использовать
+# заранее размещённый /usr/local/bin/k3s.
 k3s_skip_download: false
 
 k3s_node_token: ""

@@ -19,7 +19,6 @@ gitlab_ip:
   groups: [gitlab_node]
   bootstrap: true
 
-# --- VMs (dict keyed by vm_id) ---
 k3s_vm_ips:
   host_prefix: k3s-
   groups: [kuber]
@@ -29,18 +28,6 @@ ubuntu_vm_ips:
   host_prefix: vm-
   groups: [ubuntu_vms]
   bootstrap: false
-
-# Example
-# centos_vm_ips:
-#   host_prefix: cos-
-#   groups: [centos_vms]
-#   bootstrap: false
-#   user: centos_admin
-
-# monitoring_ip:
-#   host: monitoring
-#   groups: [monitoring_group]
-#   bootstrap: true
 
 harbor_ip:
   host: harbor

@@ -1,4 +1,4 @@
 ---
-# OS-family-dependent values, resolved at runtime.
+# Значения, зависящие от семейства ОС, разрешаются в рантайме.
 sudo_group: "{{ 'wheel' if ansible_os_family == 'RedHat' else 'sudo' }}"
 ssh_service: "{{ 'sshd' if ansible_os_family == 'RedHat' else 'ssh' }}"
