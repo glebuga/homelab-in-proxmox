@@ -47,11 +47,9 @@ resource "proxmox_virtual_environment_container" "this" {
     swap      = var.swap
   }
 
-  dynamic "disk" {
-    for_each = var.disk_size != null ? [1] : []
-    content {
-      datastore_id = "local-lvm"
-      size         = var.disk_size
-    }
+  disk {
+    datastore_id = "local-lvm"
+    size         = var.disk_size
   }
+
 }
