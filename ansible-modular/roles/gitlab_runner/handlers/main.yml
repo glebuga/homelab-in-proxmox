@@ -1,0 +1,11 @@
+---
+- name: restart gitlab-runner
+  ansible.builtin.systemd:
+    name: gitlab-runner
+    state: restarted
+  listen: restart gitlab-runner
+
+- name: update ca certificates
+  ansible.builtin.command:
+    cmd: update-ca-certificates
+  listen: update ca certificates

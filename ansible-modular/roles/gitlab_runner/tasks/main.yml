@@ -1,0 +1,97 @@
+---
+- name: Install prerequisites for gitlab-runner repo
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: true
+
+- name: Create GitLab keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download GitLab Runner GPG key
+  ansible.builtin.get_url:
+    url: "https://packages.gitlab.com/runner/gitlab-runner/gpgkey"
+    dest: /tmp/gitlab-runner-gpg.key
+    mode: "0644"
+
+- name: Dearmor GitLab Runner GPG key into keyring
+  ansible.builtin.command:
+    cmd: "gpg --dearmor -o /etc/apt/keyrings/gitlab-runner.gpg /tmp/gitlab-runner-gpg.key"
+    creates: /etc/apt/keyrings/gitlab-runner.gpg
+
+- name: Add GitLab Runner apt repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/gitlab-runner.list
+    owner: root
+    group: root
+    mode: "0644"
+    content: >-
+      deb [arch=amd64 signed-by=/etc/apt/keyrings/gitlab-runner.gpg]
+      https://packages.gitlab.com/runner/gitlab-runner/ubuntu/ {{ gitlab_runner_repo_codename | default('jammy') }} main
+
+- name: Update apt cache for GitLab Runner repository
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install GitLab Runner package
+  ansible.builtin.apt:
+    name: "gitlab-runner{% if gitlab_runner_version | default('') | length > 0 %}={{ gitlab_runner_version }}{% endif %}"
+    state: present
+
+# Self-signed: кладём cert GitLab в системный trust-store, чтобы раннер доверял HTTPS.
+- name: Install GitLab CA certificate into system trust store
+  ansible.builtin.copy:
+    src: "{{ gitlab_runner_tls_ca_file }}"
+    dest: /usr/local/share/ca-certificates/gitlab.crt
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: true
+  when: gitlab_runner_tls_ca_file | length > 0
+  notify: update ca certificates
+
+# Регистрация через config.toml (glrt-токен, без gitlab-runner register).
+- name: Render gitlab-runner config.toml
+  ansible.builtin.template:
+    src: config.toml.j2
+    dest: "{{ gitlab_runner_config_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+    force: true
+  notify: restart gitlab-runner
+
+- name: Enable and start gitlab-runner service
+  ansible.builtin.systemd:
+    name: gitlab-runner
+    enabled: true
+    state: started
+
+# Диагностика: отчёт пишется скриптом в /tmp/gitlab_runner_report.txt и печатается.
+- name: Run runner diagnostic script
+  ansible.builtin.script:
+    cmd: "/home/admin/homelab-infra/ansible-modular/scripts/gitlab-runner-diag.sh"
+  environment:
+    GITLAB_RUNNER_TLS_CA_FILE: "{{ gitlab_runner_tls_ca_file }}"
+    GITLAB_RUNNER_TLS_SKIP_VERIFY: "{{ gitlab_runner_tls_skip_verify | bool | lower }}"
+    GITLAB_RUNNER_NAME: "{{ gitlab_runner_name }}"
+    GITLAB_RUNNER_TAGS: "{{ gitlab_runner_tags }}"
+    GITLAB_RUNNER_CONCURRENT: "{{ gitlab_runner_concurrent }}"
+  changed_when: false
+
+- name: Fetch runner diagnostic report from host
+  ansible.builtin.slurp:
+    path: /tmp/gitlab_runner_report.txt
+  register: gitlab_runner_report_slurp
+
+- name: Show runner diagnostic report in terminal
+  ansible.builtin.debug:
+    msg: "{{ gitlab_runner_report_slurp.content | b64decode }}"

@@ -1,0 +1,28 @@
+## ---------------------------------------------------------------------------
+## config.toml — сгенерировано ролью ansible gitlab_runner.
+## Повторный запуск плейбука перезапишет этот файл.
+## Регистрация через современный runner auth token (glrt-...), без
+## gitlab-runner register и legacy registration token.
+## ---------------------------------------------------------------------------
+concurrent = {{ gitlab_runner_concurrent }}
+check_interval = 3
+log_level = "info"
+log_format = "runner"
+
+[[runners]]
+  name = "{{ gitlab_runner_name }}"
+  url = "{{ gitlab_runner_gitlab_url }}"
+  token = "{{ gitlab_runner_token }}"
+  executor = "{{ gitlab_runner_executor }}"
+{% if gitlab_runner_tls_ca_file | length > 0 %}
+  # Доверяем self-signed сертификату GitLab (путь на хосте раннера).
+  tls-ca-file = "{{ gitlab_runner_tls_ca_file }}"
+{% endif %}
+{% if gitlab_runner_tls_skip_verify | bool %}
+  # Self-signed homelab: отключаем проверку TLS-цепочки для раннера.
+  # Безопасно внутри LAN; для публичных инстансов используй tls-ca-file.
+  tls-skip-verify = true
+{% endif %}
+{% if gitlab_runner_tags | length > 0 %}
+  tag_list = [{% for t in gitlab_runner_tags.split(',') %}"{{ t | trim }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}

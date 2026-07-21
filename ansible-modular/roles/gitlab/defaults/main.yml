@@ -1,0 +1,56 @@
+---
+# ===========================================================================
+# Дефолтные переменные роли gitlab (omnibus-установка + локальный self-signed).
+# Большинство «инфраструктурных» значений переопределяется в
+# inventory/group_vars/gitlab_node/main.yml.
+# ===========================================================================
+
+# Редакция GitLab: gitlab-ce (community) или gitlab-ee (enterprise).
+gitlab_edition: "gitlab-ce"
+
+# Codename репозитория GitLab (в dists/). GitLab НЕ публикует пакеты для
+# всех Ubuntu-релизов — например, для noble (24.04) нет dists/noble, поэтому
+# по умолчанию берём jammy (22.04); omnibus-пакет ставится и на noble
+# (все зависимости внутри). Меняй только если целевая ОС — не Ubuntu 24.04.
+gitlab_repo_codename: "jammy"
+
+# Конкретная версия пакета (пустая строка => latest из репозитория).
+gitlab_version: ""
+
+# FQDN GitLab, совпадающий с CN/SAN TLS-сертификата.
+gitlab_hostname: "gitlab.home.local"
+
+# Внешний URL (со схемой). Рендерится в external_url в gitlab.rb.
+gitlab_external_url: "https://{{ gitlab_hostname }}"
+
+# Каталог с TLS-сертификатом/ключом внутри хоста GitLab (стандарт omnibus).
+gitlab_ssl_dir: "/etc/gitlab/ssl"
+
+# Имя файла сертификата В ИСТОЧНИКЕ (на управляющей машине, в certs/gitlab/).
+gitlab_cert_file: "gitlab.crt"
+gitlab_key_file: "gitlab.key"
+
+# Имя файла ПРИ РАЗВЁРТЫВАНИИ на хосте. Omnibus ожидает <fqdn>.crt/.key —
+# иначе сгенерирует свой self-signed и будет отдавать ЕГО (не наш), из-за
+# чего gitlab-runner не сможет проверить TLS (x509 unknown authority).
+gitlab_ssl_cert_dest: "{{ gitlab_hostname }}.crt"
+gitlab_ssl_key_dest: "{{ gitlab_hostname }}.key"
+
+# Локальный путь (на управляющей машине) к сертификатам.
+# Роль только КОПИРУЕТ их, не генерирует (генерация — вне роли, см. certs/gitlab/README.md).
+gitlab_local_cert_src: "{{ ansible_modular_root }}/certs/gitlab"
+
+# Сетевые порты (nginx omnibus).
+gitlab_https_port: 443
+gitlab_http_port: 80
+
+# Отключить встроенный Let's Encrypt (используем свой self-signed).
+gitlab_letsencrypt_enabled: false
+
+# Встроенная мониторинговая стек GitLab (Prometheus + exporters).
+# false => все сервисы мониторинга выключены (экономия ресурсов).
+# true  => включаются обратно (нужно перезапустить роль / reconfigure).
+gitlab_monitoring_enabled: false
+
+# Имя systemd-сервиса omnibus GitLab.
+gitlab_service: "gitlab-runsvdir"

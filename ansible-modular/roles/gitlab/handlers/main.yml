@@ -1,0 +1,11 @@
+---
+- name: reconfigure gitlab
+  ansible.builtin.command:
+    cmd: gitlab-ctl reconfigure
+  listen: reconfigure gitlab
+
+- name: restart gitlab
+  ansible.builtin.systemd:
+    name: "{{ gitlab_service }}"
+    state: restarted
+  listen: restart gitlab

@@ -35,5 +35,10 @@ ansible-modular/certs/harbor/*.crt
 ansible-modular/certs/harbor/*.key
 ansible-modular/certs/harbor/*.pem
 
+# GitLab TLS certificates (generated locally, never commit)
+ansible-modular/certs/gitlab/*.crt
+ansible-modular/certs/gitlab/*.key
+ansible-modular/certs/gitlab/*.pem
+
 # Harbor offline installer archive
 ansible-modular/harbor-installer/

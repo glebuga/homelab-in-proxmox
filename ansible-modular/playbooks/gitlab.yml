@@ -1,0 +1,6 @@
+---
+- name: Deploy GitLab (omnibus + self-signed TLS)
+  hosts: gitlab_node
+  become: true
+  roles:
+    - gitlab

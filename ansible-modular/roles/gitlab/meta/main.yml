@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  author: gvinogradov
+  description: GitLab omnibus installation with a locally generated self-signed TLS certificate
+  license: gvinogradov
+  min_ansible_version: "2.10"
+  galaxy_tags:
+    - gitlab
+    - ci
+    - devops
+    - omnibus
+dependencies: []

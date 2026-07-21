@@ -1,0 +1,50 @@
+---
+# ===========================================================================
+# Дефолтные переменные роли gitlab_runner.
+# Роль универсальная: по умолчанию ставится на тот же хост, что и GitLab
+# (группа gitlab_node), но может запускаться на любой другой машине —
+# достаточно задать gitlab_runner_gitlab_url и токен.
+# ===========================================================================
+
+# URL инстанса GitLab (куда цепляется раннер).
+gitlab_runner_gitlab_url: "https://gitlab.home.local"
+
+# Executor: shell (легче, без Docker) или docker (изоляция, нужен docker).
+gitlab_runner_executor: "shell"
+
+# Токен регистрации раннера (формат glrt-..., из vault).
+# Создаётся в GitLab UI/API (Admin → Runners или проект Settings → CI/CD → Runners),
+# НЕ legacy registration token.
+gitlab_runner_token: ""
+
+# Путь к CA/сертификату GitLab на хосте раннера. Должен СОВПАДАТЬ с тем,
+# что реально отдаёт nginx GitLab (см. gitlab_cert_file в роли gitlab —
+# это <fqdn>.crt, напр. gitlab.home.local.crt). Иначе раннер проверяет
+# сертификат, который nginx не отдаёт, и падает с x509 unknown authority.
+# Если сертификат уже в системном trust-store — оставь пустым.
+gitlab_runner_tls_ca_file: "/etc/gitlab/ssl/gitlab.home.local.crt"
+
+# Для self-signed сертификатов (как в этом homelab) раннер не может
+# проверить TLS-цепочку даже при наличии tls-ca-file (subcommand verify
+# игнорирует его). Отключаем проверку. В публичных инстансах поставь false
+# и полагайся на tls-ca-file / системный trust-store.
+gitlab_runner_tls_skip_verify: true
+
+# Имя раннера и теги (через запятую) — для ограничения джоб.
+gitlab_runner_name: "{{ inventory_hostname }}"
+gitlab_runner_tags: "local,shell"
+
+# Сколько джоб одновременно (0 = неограниченно).
+gitlab_runner_concurrent: 2
+
+# Пользователь, от имени которого крутятся shell-джобы.
+gitlab_runner_user: "gitlab-runner"
+
+# Каталог конфига раннера.
+gitlab_runner_config_file: "/etc/gitlab-runner/config.toml"
+
+# Codename репозитория (как у роли gitlab: jammy, т.к. GitLab не публикует noble).
+gitlab_runner_repo_codename: "jammy"
+
+# Версия пакета gitlab-runner (пусто = latest из репозитория).
+gitlab_runner_version: ""

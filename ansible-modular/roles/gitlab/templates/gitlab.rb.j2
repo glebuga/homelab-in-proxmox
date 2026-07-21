@@ -1,0 +1,46 @@
+## ---------------------------------------------------------------------------
+## gitlab.rb — сгенерировано ролью ansible gitlab.
+## Повторный запуск плейбука перезапишет этот файл.
+## ---------------------------------------------------------------------------
+
+# Внешний URL со схемой (HTTPS).
+external_url '{{ gitlab_external_url }}'
+
+# ---------------------------------------------------------------------------
+# TLS (самоподписный сертификат, сгенерирован локально и скопирован ролью).
+# ВАЖНО: имя файла — <fqdn>.crt/.key (gitlab.home.local.crt). Omnibus сам
+# генерирует self-signed именно с таким именем и использует ЕГО, если наше
+# называется иначе. Совпадающее имя гарантирует, что nginx отдаёт наш
+# сертификат (это нужно gitlab-runner для проверки TLS).
+# ---------------------------------------------------------------------------
+nginx['ssl_certificate'] = "{{ gitlab_ssl_dir }}/{{ gitlab_ssl_cert_dest }}"
+nginx['ssl_certificate_key'] = "{{ gitlab_ssl_dir }}/{{ gitlab_ssl_key_dest }}"
+
+# Явно слушаем стандартные порты.
+nginx['listen_port'] = {{ gitlab_https_port }}
+nginx['listen_https'] = true
+nginx['redirect_http_to_https'] = true
+nginx['http_port'] = {{ gitlab_http_port }}
+
+# ---------------------------------------------------------------------------
+# Отключаем встроенный Let's Encrypt — используем свой self-signed.
+# ---------------------------------------------------------------------------
+letsencrypt['enable'] = {{ gitlab_letsencrypt_enabled | bool | lower }}
+
+# ---------------------------------------------------------------------------
+# Встроенный мониторинг (Prometheus + exporters).
+# Выключен по умолчанию, чтобы не жрать ресурсы. Чтобы включить — поставь
+# gitlab_monitoring_enabled = true и перезапусти роль (gitlab-ctl reconfigure).
+# ---------------------------------------------------------------------------
+prometheus_monitoring['enable'] = {{ gitlab_monitoring_enabled | bool | lower }}
+prometheus['enable'] = {{ gitlab_monitoring_enabled | bool | lower }}
+node_exporter['enable'] = {{ gitlab_monitoring_enabled | bool | lower }}
+redis_exporter['enable'] = {{ gitlab_monitoring_enabled | bool | lower }}
+postgres_exporter['enable'] = {{ gitlab_monitoring_enabled | bool | lower }}
+gitlab_exporter['enable'] = {{ gitlab_monitoring_enabled | bool | lower }}
+
+# ---------------------------------------------------------------------------
+# Пароль root из vault (применяется только при первом reconfigure; для
+# идемпотентной установки пароля используется отдельная таска gitlab-rails).
+# ---------------------------------------------------------------------------
+gitlab_rails['initial_root_password'] = "{{ gitlab_root_password }}"

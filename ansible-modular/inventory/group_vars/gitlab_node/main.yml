@@ -1,0 +1,22 @@
+---
+# FQDN GitLab, совпадающий с CN/SAN TLS-сертификата.
+gitlab_hostname: "gitlab.home.local"
+
+# Внешний URL (со схемой). Рендерится в external_url в gitlab.rb.
+gitlab_external_url: "https://{{ gitlab_hostname }}"
+
+# Редакция и версия.
+gitlab_edition: "gitlab-ce"
+gitlab_version: ""
+
+# Сетевые порты (nginx omnibus).
+gitlab_https_port: 443
+gitlab_http_port: 80
+
+# Отключить встроенный Let's Encrypt (используем свой self-signed).
+gitlab_letsencrypt_enabled: false
+
+# Локальный путь (на управляющей машине) к сертификатам.
+gitlab_local_cert_src: "{{ ansible_modular_root }}/certs/gitlab"
+
+# Секрет (gitlab_root_password) определён в vault.yml
